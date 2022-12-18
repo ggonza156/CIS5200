@@ -1,0 +1,334 @@
+Uploading Files to Server 
+
+Scp instagram_locations.csv ggonza156@144.24.14.145:/home/ggonza156 
+
+ 
+
+Uploading to HDFS 
+
+Hdfs dfs –mkdir instagram_locations 
+
+Hdfs dfs –put instagram_locations.csv instagram_locations 
+
+ 
+
+Creating Tables 
+
+ 
+
+CREATE EXTERNAL TABLE IF NOT EXISTS instagram_locations (  
+
+sid STRING, id STRING, name STRING, street STRING, zip STRING, city STRING, region STRING, cd  STRING, phone STRING, exact_city STRING, exact_country STRING, blurb STRING, city_id INT, city_name STRING, city_tag STRING, country_id STRING, country STRING, lat STRING, lng STRING, bool_flag STRING, slug STRING, website STRING, cts TIMESTAMP 
+
+)  
+
+ROW FORMAT DELIMITED  
+
+FIELDS TERMINATED BY '\t'  
+
+LOCATION '/user/ggonza156/instagram_locations' 
+
+TBLPROPERTIES ('skip.header.line.count'='1'); 
+
+ 
+
+ 
+
+CREATE EXTERNAL TABLE IF NOT EXISTS instagram_profiles (  
+
+sid STRING, id STRING, profile_name STRING, firstname_lastname STRING, description STRING, insta_following INT, followers INT, n_posts  INT, url STRING, cts TIMESTAMP, is_business_account STRING 
+
+)  
+
+ROW FORMAT DELIMITED  
+
+FIELDS TERMINATED BY '\t'  
+
+LOCATION '/user/ggonza156/instagram_profiles' 
+
+TBLPROPERTIES ('skip.header.line.count'='1'); 
+
+ 
+
+ 
+
+CREATE EXTERNAL TABLE IF NOT EXISTS instagram_posts (  
+
+Sid INT, sid_profile STRING, post_id STRING, profile_id STRING, location_id STRING, cts TIMESTAMP, post_type INT, description STRING, number_likes INT, number_comments INT 
+
+)  
+
+ROW FORMAT DELIMITED  
+
+FIELDS TERMINATED BY '\t'  
+
+LOCATION '/user/ggonza156/instagram_posts' 
+
+TBLPROPERTIES ('skip.header.line.count'='1'); 
+
+ 
+ 
+
+Select * from instagram_locations LIMIT 2; 
+
+ 
+ 
+
+Select * from instagram_locs_copy LIMIT 2; 
+
+ 
+ 
+
+Select * from instagram_prof_copy where insta_following != NULL; 
+
+ 
+Data Analysis 
+
+DID NOT WORK 
+
+CREATE TABLE instagram_locs_copy AS select sid, id, name, exact_city, exact_country, lat, lng from instagram_locations; 
+
+ 
+ 
+
+CREATE TABLE instagram_prof_copy AS select sid, id, profile_name, insta_following, followers, n_posts, cts from instagram_profiles; 
+
+ 
+ 
+
+SELECT c.sid, c.exact_city, c.exact_country, c.lat, c.lng, o.profile_name, o.insta_following, o.followers, o.n_posts FROM instagram_locs_copy c LEFT OUTER JOIN instagram_prof_copy o ON(c.sid=o.sid); 
+
+ 
+ 
+ 
+ 
+
+CREATE TABLE posts_clean AS select sid, profile_id, post_type, number_likes, number_comments from instagram_posts; 
+
+ 
+
+show tables; 
+
+  
+
+describe instagram_profiles; 
+
+describe instagram_prof_copy 
+
+  
+
+  
+
+  
+
+SELECT * FROM instagram_profiles ORDER BY followers LIMIT 6; 
+
+  
+
+SELECT profile_name, followers, is_business_account FROM instagram_profiles ORDER BY followers LIMIT 6; 
+
+  
+
+  
+
+  
+
+  
+
+  
+
+SELECT * FROM instagram_prof_copy ORDER BY followers DESC LIMIT 6; 
+
+  
+
+SELECT profile_name, followers FROM instagram_prof_copy ORDER BY followers DESC LIMIT 6; 
+
+  
+
+  
+
+  
+
+  
+
+SELECT * FROM instagram_prof_copy ORDER BY insta_following DESC LIMIT 5; 
+
+  
+
+SELECT profile_name, insta_following FROM instagram_prof_copy ORDER BY insta_following DESC LIMIT 5; 
+
+  
+
+  
+
+  
+
+  
+
+SELECT * FROM instagram_prof_copy ORDER BY n_posts DESC LIMIT 6; 
+
+  
+
+SELECT profile_name, n_posts FROM instagram_prof_copy ORDER BY n_posts DESC LIMIT 6; 
+
+ 
+
+ 
+
+  
+
+SELECT * FROM instagram_posts ORDER BY number_likes DESC LIMIT 6; 
+
+SELECT * FROM posts_clean ORDER BY number_likes DESC LIMIT 6; 
+
+SELECT profile_name, n_posts FROM instagram_prof_copy ORDER BY n_posts DESC LIMIT 6; 
+
+  
+
+SELECT profile_name, n_posts FROM instagram_prof_copy ORDER BY n_posts DESC LIMIT 6; 
+
+  
+
+  
+
+SELECT c.sid, c.post_type, c.number_likes, c.number_comments, o.profile_name, o.insta_following, o.followers, o.n_posts 
+
+FROM posts_clean c 
+
+LEFT OUTER JOIN instagram_prof_copy o ON(c.sid=o.sid) 
+
+ORDER BY c.number_likes DESC LIMIT 6; 
+
+  
+
+SELECT c.sid, c.post_type, c.number_likes, c.number_comments, o.profile_name, o.insta_following, o.followers, o.n_posts 
+
+FROM posts_clean c 
+
+LEFT OUTER JOIN instagram_prof_copy o ON(c.sid=o.sid) 
+
+ORDER BY c.number_comments DESC LIMIT 6; 
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+DID NOT WORK 
+
+SELECT c.profile_name, c.insta_following, c.followers, c.n_posts, o.sid, o.post_type, o.number_likes 
+
+FROM instagram_prof_copy c 
+
+LEFT OUTER JOIN posts_clean o ON(c.sid=o.sid) 
+
+ORDER BY o.number_likes DESC LIMIT 6; 
+
+  
+
+DID NOT WORK 
+
+SELECT c.sid, c.post_type, c.number_likes, c.number_comments, o.profile_name, o.insta_following, o.followers, o.n_posts 
+
+FROM instagram_prof_copy o 
+
+LEFT OUTER JOIN posts_clean c ON(c.sid=o.sid) 
+
+ORDER BY c.number_likes DESC LIMIT 6; 
+
+  
+
+SELECT c.sid, c.post_type, c.number_likes, c.number_comments, o.profile_name 
+
+FROM posts_clean c 
+
+LEFT OUTER JOIN instagram_prof_copy o ON(c.sid=o.sid) 
+
+ORDER BY c.number_likes DESC LIMIT 6; 
+
+  
+
+SELECT * FROM instagram_prof_copy WHERE sid=34909573; 
+
+  
+
+SELECT profile_id, post_type, description, number_likes, number_comments 
+
+FROM instagram_posts 
+
+ORDER BY number_likes DESC LIMIT 6; 
+
+  
+
+SELECT profile_id, post_type, description, number_likes, number_comments 
+
+FROM instagram_posts 
+
+ORDER BY number_comments DESC LIMIT 6; 
+
+  
+
+  
+
+SELECT profile_id, post_type, number_likes, number_comments 
+
+FROM instagram_posts 
+
+ORDER BY number_likes DESC LIMIT 6; 
+
+  
+
+SELECT profile_id, post_type, number_likes, number_comments 
+
+FROM instagram_posts 
+
+ORDER BY number_comments DESC LIMIT 6; 
+
+  
+
+  
+
+  
+
+  
+
+SELECT c.post_id, c.profile_id, c.post_type, c.number_likes, c.number_comments, o.profile_name 
+
+FROM instagram_posts c 
+
+LEFT OUTER JOIN instagram_profiles o ON(c.sid=o.sid) 
+
+ORDER BY c.number_likes DESC LIMIT 6; 
+
+  
+
+SELECT c.post_id, c.profile_id, c.post_type, c.number_likes, c.number_comments, o.profile_name 
+
+FROM instagram_posts c 
+
+LEFT OUTER JOIN instagram_profiles o ON(c.sid=o.sid) 
+
+ORDER BY c.number_comments DESC LIMIT 6; 
+
+ 
+
+ 
+
+EXPORT DATA 
+
+ 
+
+INSERT OVERWRITE DIRECTORY '/user/ggonza156' 
+
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','  
+
+ SELECT * FROM instagram_prof_copy; 
+
+ 
